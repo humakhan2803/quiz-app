@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>Quiz App</h1>
+            <p id="timer">Time Left: 00:00</p>
+        </div>
+
+        <div class="question-container">
+            <p id="question-text"></p>
+            <ul id="options-list">
+                <!-- Options will be added dynamically here -->
+            </ul>
+        </div>
+
+        <div class="quiz-footer">
+            <button id="next-btn">Next</button>
+            <p id="quiz-status"></p>
+        </div>
+    </div>
+
+    <script >
+        const quizData = [
+    {
+        question: "What is the capital of France?",
+        options: ["Berlin", "Madrid", "Paris", "Rome"],
+        correct: 2
+    },
+    {
+        question: "Who painted the Mona Lisa?",
+        options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Claude Monet"],
+        correct: 2
+    },
+    {
+        question: "Which planet is known as the Red Planet?",
+        options: ["Earth", "Mars", "Jupiter", "Saturn"],
+        correct: 1
+    },
+    {
+        question: "What is the largest mammal in the world?",
+        options: ["Elephant", "Blue Whale", "Giraffe", "Shark"],
+        correct: 1
+    },
+    {
+        question: "Which country is known as the Land of the Rising Sun?",
+        options: ["China", "South Korea", "Japan", "India"],
+        correct: 2
+    },
+    // Add more questions as needed
+];
+
+let currentQuestionIndex = 0;
+let score = 0;
+let timer = 30; // Timer in seconds
+let timerInterval;
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadQuestion();
+    startTimer();
+
+    document.getElementById('next-btn').addEventListener('click', handleNext);
+});
+
+function loadQuestion() {
+    const questionData = quizData[currentQuestionIndex];
+    document.getElementById('question-text').textContent = questionData.question;
+
+    const optionsList = document.getElementById('options-list');
+    optionsList.innerHTML = '';
+
+    questionData.options.forEach((option, index) => {
+        const li = document.createElement('li');
+        const button = document.createElement('button');
+        button.classList.add('option-btn');
+        button.textContent = option;
+        button.addEventListener('click', () => handleOptionClick(index));
+        li.appendChild(button);
+        optionsList.appendChild(li);
+    });
+}
+
+function handleOptionClick(selectedIndex) {
+    const questionData = quizData[currentQuestionIndex];
+    const isCorrect = selectedIndex === questionData.correct;
+
+    if (isCorrect) {
+        score++;
+    }
+
+    // Disable all options after selection
+    const buttons = document.querySelectorAll('.option-btn');
+    buttons.forEach(button => button.disabled = true);
+
+    // Show feedback
+    document.getElementById('quiz-status').textContent = isCorrect ? "Correct!" : "Wrong!";
+}
+
+function handleNext() {
+    if (currentQuestionIndex < quizData.length - 1) {
+        currentQuestionIndex++;
+        loadQuestion();
+        document.getElementById('quiz-status').textContent = '';
+    } else {
+        showFinalScore();
+        clearInterval(timerInterval);
+    }
+}
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timer--;
+        document.getElementById('timer').textContent = `Time Left: ${formatTime(timer)}`;
+
+        if (timer <= 0) {
+            clearInterval(timerInterval);
+            showFinalScore();
+        }
+    }, 1000);
+}
+
+function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
+function showFinalScore() {
+    document.querySelector('.quiz-container').innerHTML = `
+        <h1>Quiz Completed!</h1>
+        <p>Your score: ${score} / ${quizData.length}</p>
+        <button onclick="restartQuiz()">Try Again</button>
+    `;
+}
+
+function restartQuiz() {
+    score = 0;
+    currentQuestionIndex = 0;
+    timer = 30;
+    loadQuestion();
+    startTimer();
+}
+
+    </script>
+</body>
+</html>
